@@ -14,7 +14,7 @@ class Scraper(object):
         self.logger = logger
         self.processed_urls = []
         self.words_to_find_regex = None
-        self.main_url = 'https://www.fonduri-ue.ro'
+        self.main_url = 'https://beneficiar.fonduri-ue.ro:8080'
         self.anunturi_url = '{}/anunturi'.format(self.main_url)
         self.desc_regex = r'(\/desc-lot\?d=.*?)"'
         self.matchObj = None
@@ -67,7 +67,7 @@ class Scraper(object):
             text = response.text.encode('utf-8').decode('utf-8')
             if response.status_code == 200:
                 for url_part in re.findall(r'a href="\/anunturi(\/details.*?)"', text,  re.M | re.I):
-                    anunt_url ='{}{}'.format(self.anunturi_url, url_part)
+                    anunt_url ='{}{}'.format(self.anunturi_url, url_part.encode("utf-8"))
                     if anunt_url not in self.processed_urls:
                         anunt_resp = requests.get(anunt_url)
                         if anunt_resp.status_code == 200:
