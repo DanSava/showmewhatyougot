@@ -10,8 +10,8 @@ import os
 
 
 class Scraper(object):
-    def __init__(self, logger):
-        self.logger = logger
+    def __init__(self):
+        self.logger = logging.getLogger('croller')
         self.processed_urls = []
         self.words_to_find_regex = None
         self.main_url = 'https://beneficiar.fonduri-ue.ro:8080'
@@ -66,12 +66,12 @@ class Scraper(object):
             response = requests.get(self.anunturi_url)
             text = response.text.encode('utf-8').decode('utf-8')
             if response.status_code == 200:
-                for url_part in re.findall(r'a href="\/anunturi(\/details.*?)"', text,  re.M | re.I):
-                    anunt_url ='{}{}'.format(self.anunturi_url, url_part.encode("utf-8"))
+                for url_part in re.findall(r'a href="/anunturi(/details.*?)"', text,  re.M | re.I):
+                    anunt_url ='{}{}'.format(self.anunturi_url, url_part).encode("utf-8")
                     if anunt_url not in self.processed_urls:
                         anunt_resp = requests.get(anunt_url)
                         if anunt_resp.status_code == 200:
-                            self.logger.info("Processing url {}".format(anunt_url))
+                            self.logger.info("Processing url {}".format(anunt_url.decode('utf-8')))
                             anunt_text = anunt_resp.text.encode('utf-8').decode('utf-8')
 
                             # Find interesting words in anunt page
@@ -93,7 +93,7 @@ class Scraper(object):
         self.scheduler.run()
 
 
-if __name__ == '__main__':
+def setup_logger():
     logger = logging.getLogger('croller')
     logger.setLevel(logging.INFO)
     # create console handler and set level to info
@@ -106,5 +106,8 @@ if __name__ == '__main__':
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    x = Scraper(logger)
+
+if __name__ == '__main__':
+    setup_logger()
+    x = Scraper()
     x.start()
